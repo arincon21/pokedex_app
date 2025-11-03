@@ -1,7 +1,7 @@
 import '../entities/pokemon.dart';
 
 abstract class PokemonRepository {
-  Future<List<Pokemon>> getPokemons();
+  Future<List<Pokemon>> getPokemons({int offset = 0, int limit = 20});
   Future<Pokemon> getPokemonById(String id);
   Future<void> toggleFavorite(String id);
 }

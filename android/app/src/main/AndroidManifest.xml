@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Permiso para acceso a Internet (necesario para llamadas a PokeAPI con Dio) -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="pokedex_app"
         android:name="${applicationName}"

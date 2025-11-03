@@ -1,10 +1,32 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/datasources/pokemon_remote_datasource.dart';
 import '../../data/repositories/pokemon_repository_impl.dart';
-import '../../domain/entities/pokemon.dart';
+// Domain types are accessed directly where needed; repository implementation is
+// provided by `pokemonRepositoryProvider` above.
 
-final pokemonRepositoryProvider = Provider((ref) => PokemonRepositoryImpl());
-
-final pokemonListProvider = FutureProvider<List<Pokemon>>((ref) async {
-  final repository = ref.watch(pokemonRepositoryProvider);
-  return repository.getPokemons();
+final dioProvider = Provider((ref) {
+  final dio = Dio(BaseOptions(
+    connectTimeout: const Duration(seconds: 5),
+    receiveTimeout: const Duration(seconds: 3),
+    responseType: ResponseType.json,
+  ));
+  
+  dio.interceptors.add(LogInterceptor(
+    requestBody: true,
+    responseBody: true,
+  ));
+  
+  return dio;
 });
+
+final pokemonRemoteDataSourceProvider = Provider((ref) {
+  final dio = ref.watch(dioProvider);
+  return PokemonRemoteDataSourceImpl(dio: dio);
+});
+
+final pokemonRepositoryProvider = Provider((ref) {
+  final remoteDataSource = ref.watch(pokemonRemoteDataSourceProvider);
+  return PokemonRepositoryImpl(remoteDataSource: remoteDataSource);
+});
+// Pagination is handled in the UI (HomeScreen) using the reposit

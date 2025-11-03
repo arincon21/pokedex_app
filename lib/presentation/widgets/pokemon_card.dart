@@ -18,112 +18,141 @@ class PokemonCard extends StatelessWidget {
     this.onFavoritePressed,
   });
 
-  Color _getTypeColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'planta':
-        return Colors.lightGreen;
-      case 'fuego':
-        return Colors.deepOrange;
-      case 'veneno':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final bgImagePath = types.isNotEmpty
+        ? 'assets/images/bg-types/Type=${types.first.toLowerCase()}.png'
+        : null;
+
     return Card(
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-  // Reemplazamos withOpacity por withAlpha (0.2 * 255 ~= 51)
-  color: _getTypeColor(types.first).withAlpha(51),
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Nº$number',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      clipBehavior: Clip.hardEdge,
+      child: Container(
+        decoration: bgImagePath != null
+            ? BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(bgImagePath),
+                  fit: BoxFit.cover,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: types.map((type) => _buildTypeChip(type)).toList(),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            right: 8,
-            top: 8,
-            child: IconButton(
-              icon: Icon(
-                isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : Colors.grey,
+              )
+            : BoxDecoration(color: Colors.grey.shade100),
+        child: Stack(
+          children: [
+            // contenido principal (nombre en Title Case)
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Nº$number', style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(_toTitleCase(name), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Row(children: types.map((t) => _buildTypeChip(t)).toList()),
+                ],
               ),
-              onPressed: onFavoritePressed,
             ),
-          ),
-          Positioned(
-            right: 0,
-            bottom: 0,
-              child: Image(
-                image: AssetImage(imageUrl),
-              width: 100,
-              height: 100,
-              fit: BoxFit.contain,
+
+            // favorito con diseño circular (borde blanco y círculo interior)
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onFavoritePressed,
+                  borderRadius: BorderRadius.circular(999),
+                  child: Container(
+                    width: 35,
+                    height: 35,
+                    padding: const EdgeInsets.all(0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                    ),
+                    child: Center(
+                      child: Container(
+                        width: 35,
+                        height: 35,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isFavorite ? Colors.grey.shade700 : Colors.grey.shade700.withOpacity(0.7),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite ? Colors.red : Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+
+            // imagen del pokemon
+            Positioned(
+              right: 35,
+              bottom: 15,
+              child: SizedBox(
+                width: 80,
+                height: 80,
+                child: imageUrl.toLowerCase().startsWith('http')
+                    ? Image.network(imageUrl, fit: BoxFit.contain, errorBuilder: (c, e, s) => const SizedBox.shrink())
+                    : Image.asset(imageUrl, fit: BoxFit.contain),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
+  String _translateType(String type) {
+    switch (type.toLowerCase()) {
+      case 'steel': return 'Acero';
+      case 'water': return 'Agua';
+      case 'bug': return 'Bicho';
+      case 'dragon': return 'Dragon';
+      case 'electric': return 'Electrico';
+      case 'ghost': return 'Fantasma';
+      case 'fire': return 'Fuego';
+      case 'fairy': return 'Hada';
+      case 'ice': return 'Hielo';
+      case 'fighting': return 'Lucha';
+      case 'normal': return 'Normal';
+      case 'grass': return 'Planta';
+      case 'psychic': return 'Psíquico';
+      case 'rock': return 'Roca';
+      case 'dark': return 'Siniestro';
+      case 'ground': return 'Tierra';
+      case 'poison': return 'Veneno';
+      case 'flying': return 'Volador';
+      default: return type;
+    }
+  }
+
+  String _toTitleCase(String input) {
+    if (input.trim().isEmpty) return input;
+    return input
+        .split(' ')
+        .map((word) => word.isEmpty
+            ? word
+            : '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}')
+        .join(' ');
+  }
+
   Widget _buildTypeChip(String type) {
+    final translatedType = _translateType(type);
     return Container(
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: _getTypeColor(type),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            type.toLowerCase() == 'planta' 
-                ? Icons.grass 
-                : type.toLowerCase() == 'fuego'
-                    ? Icons.local_fire_department
-                    : Icons.science,
-            color: Colors.white,
-            size: 16,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            type,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+      margin: const EdgeInsets.only(right: 6),
+      child: Image.asset(
+        'assets/images/types/Type=$translatedType.png',
+        height: 28,
+        fit: BoxFit.contain,
       ),
     );
   }

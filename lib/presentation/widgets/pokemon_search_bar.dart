@@ -14,26 +14,75 @@ class PokemonSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        onSubmitted: (_) => onSubmitted?.call(),
-        decoration: InputDecoration(
-          hintText: 'Procurar Pókemon...',
-          prefixIcon: const Icon(Icons.search, color: Colors.grey),
-          suffixIcon: IconButton(
-            icon: const Icon(Icons.search, color: Colors.grey),
-            onPressed: onSubmitted,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(
+                  color: const Color(0xFFE8E8E8),
+                  width: 1.5,
+                ),
+              ),
+              child: TextField(
+                controller: controller,
+                onChanged: onChanged,
+                onSubmitted: (_) => onSubmitted?.call(),
+                textAlignVertical: TextAlignVertical.center,
+                decoration: const InputDecoration(
+                  hintText: 'Procurar Pókemon...',
+                  hintStyle: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 16,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 15),
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 15),
+                    child: Icon(
+                      Icons.search,
+                      color: Colors.grey,
+                      size: 24,
+                    ),
+                  ),
+                  prefixIconConstraints: BoxConstraints(
+                    minWidth: 45,
+                  ),
+                ),
+              ),
+            ),
           ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        ),
+          const SizedBox(width: 15),
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFFE8E8E8),
+                width: 1.5,
+              ),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(25),
+                onTap: onSubmitted,
+                child: const Icon(
+                  Icons.search,
+                  color: Colors.grey,
+                  size: 26,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

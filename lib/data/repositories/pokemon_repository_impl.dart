@@ -1,65 +1,43 @@
 import '../../domain/entities/pokemon.dart';
 import '../../domain/repositories/pokemon_repository.dart';
+import '../datasources/pokemon_remote_datasource.dart';
 
 class PokemonRepositoryImpl implements PokemonRepository {
+  final PokemonRemoteDataSource _remoteDataSource;
+
+  PokemonRepositoryImpl({required PokemonRemoteDataSource remoteDataSource}) : _remoteDataSource = remoteDataSource;
 
   @override
-  Future<List<Pokemon>> getPokemons() async {
-    // Simulamos un pequeño retraso para mostrar el estado de carga
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    return [
-      Pokemon(
-        id: '001',
-        name: 'BULBASAUR',
-        types: ['PLANTA', 'VENENO'],
-        // Usamos imagen de muestra incluida en el proyecto
-        imageUrl: 'assets/images/OnboardingScreen 1.png',
-        isFavorite: false,
-      ),
-      Pokemon(
-        id: '002',
-        name: 'IVYSAUR',
-        types: ['PLANTA', 'VENENO'],
-        imageUrl: 'assets/images/OnboardingScreen 2.png',
-        isFavorite: true,
-      ),
-      Pokemon(
-        id: '003',
-        name: 'VENUSAUR',
-        types: ['PLANTA', 'VENENO'],
-        imageUrl: 'assets/images/OnboardingScreen 1.png',
-        isFavorite: false,
-      ),
-      Pokemon(
-        id: '004',
-        name: 'CHARMANDER',
-        types: ['FUEGO'],
-        imageUrl: 'assets/images/OnboardingScreen 2.png',
-        isFavorite: false,
-      ),
-      Pokemon(
-        id: '005',
-        name: 'CHARMELEON',
-        types: ['FUEGO'],
-        imageUrl: 'assets/images/OnboardingScreen 1.png',
-        isFavorite: false,
-      ),
-    ];
+  Future<List<Pokemon>> getPokemons({int offset = 0, int limit = 20}) async {
+    final pokemons = await _remoteDataSource.getPokemons(offset, limit);
+    return pokemons.map((p) => Pokemon(
+      id: p.id,
+      name: p.name,
+      types: p.types,
+      imageUrl: p.imageUrl,
+      isFavorite: p.isFavorite,
+    )).toList();
   }
 
   @override
   Future<Pokemon> getPokemonById(String id) async {
-    final pokemons = await getPokemons();
-    return pokemons.firstWhere(
-      (pokemon) => pokemon.id == id,
-      orElse: () => throw Exception('Pokemon no encontrado'),
-    );
+    try {
+      final pokemon = await _remoteDataSource.getPokemonDetails(id);
+      return Pokemon(
+        id: pokemon.id,
+        name: pokemon.name,
+        types: pokemon.types,
+        imageUrl: pokemon.imageUrl,
+        isFavorite: pokemon.isFavorite,
+      );
+    } catch (e) {
+      throw Exception('Pokemon not found');
+    }
   }
 
   @override
   Future<void> toggleFavorite(String id) async {
-    // Por ahora no implementamos la persistencia de favoritos
+    // Persistencia de favoritos no implementada en este ejercicio
     await Future.delayed(const Duration(milliseconds: 100));
   }
 }
